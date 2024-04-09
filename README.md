@@ -54,7 +54,7 @@ The t-Distributed Stochastic Neighbor embedding (t-SNE) method is a popular dime
 
 The Flowchart represents a high level process plan to use the given gene subset and conduct statistical test to reduce the dimension followed by supervised and unsupervised modelling to classify invasive and non-invasive cancer types
 
-![C:\Users\farjaad\Downloads\flow.drawio.png](Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.002.png)
+![C:\Users\farjaad\Downloads\flow.drawio.png](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.002.png)
 # <a name="_toc161238050"></a>**Discussion**
 ## <a name="_toc161238051"></a>**Unsupervised learning model**
 We will be accounting for 90% of total cumulative variation. This variation is given by first 49 principal components. We will now use unsupervised learning methods for making clusters:
@@ -67,7 +67,7 @@ K-means randomly selects clusters and then classifies all the data points in the
 
 ![A graph of a number of clusters
 
-Description automatically generated](Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.003.png)
+Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.003.png)
 
 The above graph tells us about the optimal number of clusters. Based on the WCSS values, we observe a notable change in the slope around k = 3 or k = 4, indicating that 3 or 4 clusters is a reasonable choice. 
 
@@ -75,7 +75,7 @@ The above graph tells us about the optimal number of clusters. Based on the WCSS
 
 ![A graph with numbers and lines
 
-Description automatically generated](Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.004.png)
+Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.004.png)
 
 The silhouette score falls in –1 to 1. Any value which is closer to 1 is better. According to this, the maximum average silhouette widths are recorded for k = 3 (0.7522921). Breaking our PCA-reduced gene expression data into three clusters is expected to offer the most distinct and well-separated grouping. After k = 3, the scores start to decline, indicating that more clusters do not enhance the ability to distinguish between them. From above 2 methods, we are finalizing the value of **k=3.**
 
@@ -83,15 +83,15 @@ Following is the plot for the 3-clusters we got using K-means.
 
 ![A graph with numbers and dots
 
-Description automatically generated](Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.005.png)
-- ### ![](Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.006.png)<a name="_toc161238053"></a>***Hierarchical Clustering:***
+Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.005.png)
+- ### ![](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.006.png)<a name="_toc161238053"></a>***Hierarchical Clustering:***
 In unsupervised learning, hierarchical clustering is a strategy that groups similar data points into clusters according to their similarities or distances from one another. It produces a hierarchy of clusters, each of which has a dendrogram connecting them. The distance metric that we will be using is ‘Euclidean’ and the linkage with ‘complete’.
 ### <a name="_toc161238054"></a>***TSNE Model:*** 
 In machine learning and data visualisation, t-distributed Stochastic Neighbour Embedding (t-SNE) is a well-liked dimensionality reduction method. When high-dimensional data is visualised in lower-dimensional areas, usually 2D or 3D, it works especially well. In order to identify clusters, patterns, and correlations within the data, t-SNE is helpful since it maintains local commonalities between data points in the original high-dimensional space.
 
 **Our result:**
 
-![](Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.007.png)
+![](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.007.png)
 
 From above plot, we are getting 3 clusters.
 ## <a name="_toc161238055"></a>**Supervised Learning Model:**
@@ -104,7 +104,7 @@ The most common classification method. We used the “glmnet” package to train
 
 ![A screenshot of a computer code
 
-Description automatically generated](Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.008.png)
+Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.008.png)
 
 Lr\_hyperparameters, contains the parameters inside the logistic regression model which are used for tuning.
 
@@ -114,31 +114,31 @@ LDA is primarily a dimensionality reduction technique which helps us train compl
 
 ![A computer code with black text
 
-Description automatically generated with medium confidence](Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.009.png)
+Description automatically generated with medium confidence](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.009.png)
 - ### <a name="_toc161238059"></a>***K-Nearest Neighbors***
 KNN considers the nearest neighbors and their class for classification of any new datapoint. The number of neighbors is the main parameter which is used to tune. Accuracy obtained by KNN is 0.75
 
 ![A screenshot of a computer code
 
-Description automatically generated](Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.010.png)
+Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.010.png)
 - ### <a name="_toc161238060"></a>***Random Forest***
 Random Forest is an ensemble technique which allows to capture complex relationships. 
 
 ![A screenshot of a computer program
 
-Description automatically generated](Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.011.png)
+Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.011.png)
 
 For our dataset, Random forest was leading to over fit, so we have selected cross validation only. The median accuracy is 0.714
 - ### <a name="_toc161238061"></a>***Support Vector Classifier***
 ![A screenshot of a computer code
 
-Description automatically generated](Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.012.png)
+Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.012.png)
 
 SVM demonstrated competitive performance, particularly in scenarios with high-dimensional data and complex decision boundaries. Its ability to handle non-linear data through kernel tricks made it a valuable model for various classification tasks. The hyperparameter tuning for SVM contains the optimization factor. The accuracy is 0.833
 - ### <a name="_toc161238062"></a>***Gradient Boosting Model***
 ![A computer code with black text
 
-Description automatically generated](Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.013.png)
+Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.013.png)
 
 GBM can handle heterogeneous features and is robust to outliers due to its ensemble nature. It typically provides high predictive accuracy and can capture complex interactions between variables.
 
@@ -146,13 +146,13 @@ The median accuracy for GBM is  0.845.
 - ### <a name="_toc161238063"></a>***Extreme Gradient* Boosting**  
 ![A screenshot of a computer code
 
-Description automatically generated](Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.014.png)
+Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.014.png)
 
 XGboost is one of the most recent boosting methods and is widely used in Machine Learning. One of the best advantages of XGboost is that it stays robust even for the data set with missing values.
 
 ![A screenshot of a computer
 
-Description automatically generated](Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.015.png)
+Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.015.png)
 
 There are various parameters that can be used for hyperparameter tuning of XGboost, like, the learning rate, maximum depth, etc. The median accuracy of xgboost is  0.69. Following are best parameters after hyperparameter.
 ## <a name="_toc161238064"></a>**Evaluating the results of Resampling:**
@@ -178,7 +178,7 @@ There are various parameters that can be used for hyperparameter tuning of XGboo
 |**SVM**|0\.833|0\.708|0\.833|0\.833|0\.75|
 |**XGB**|0\.690|0\.708|0\.667|0\.667|0\.75|
 
-![](Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.016.png)
+![](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.016.png)
 
 So, from the above resampling done on the supervised learning model, we can see that Gradient Boosting Model gives us the best accuracy. It performs well across a range of metrics, suggesting that it can effectively manage the subtleties of your dataset.
 # <a name="_toc161238070"></a>**Conclusion**
