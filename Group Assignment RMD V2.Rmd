@@ -1,0 +1,436 @@
+---
+title: 'MA321-7 Team Project Assignment'
+author: "Group 2 Team F"
+date: "11-Mar-2024"
+output:
+  word_document: default
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r, eval=TRUE}
+# Load necessary library
+suppressWarnings({ 
+# Code that generates warning messages 
+  library(stats)
+library(pls)
+library(caret)
+library(Rtsne)
+library(tidymodels)
+library(themis)
+library(tidyverse)
+library(ggplot2)
+library(MASS)
+library(gbm)
+library(class)
+library(randomForest)
+library(e1071)
+library(nnet)
+library(dplyr)
+library(xgboost)
+library(glmnet)
+library(cluster)
+library(knitr) 
+})
+```
+
+\textbf{Task 1A: Compute the variance, co-variance and correlation matrix of your random subset of 10 genes. Add an appropriate table to your report.}
+
+```{r, eval=TRUE}
+# Loading data from CSV
+InitialData <- read.csv(file="gene-expression-invasive-vs-noninvasive-cancer.csv")
+
+# Declare variable for to store seed value
+seed_val = 2312489
+
+# Set seed for reproducing random subset (Based on largest registration number within group)
+set.seed(seed_val)
+
+# Picking the random 2000 Genes from dataset
+team.gene.subset <- rank(runif(1:4948))[1:2000]
+
+#Creating a Vector to store the 2000 genes and also add last columns i.e. Class variables
+team.gene.subset <- c(team.gene.subset, 4949)
+team.gene.subset <- InitialData[, team.gene.subset]
+```
+
+
+```{r, eval=TRUE}
+#Data Preprocessing
+
+# Display the performance improvement
+cat("NA Count (Before data pre processing):", sum(is.na(team.gene.subset)), "\n")
+
+# Imputation: Replacing NA with Mean Value
+team.gene.subset <- team.gene.subset %>%
+  mutate(across(-ncol(.), ~ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+
+# Display the performance improvement
+cat("NA Count (After data pre processing):", sum(is.na(team.gene.subset)), "\n")
+```
+
+\textbf{Task 1: Consider unsupervised and supervised dimension reduction of the 2000 observed gene expression values in your data set.}
+```{r, eval=TRUE}
+# Task 1A - Unsupervised Dimension Reduction using PCA
+# Perform PCA on gene expression data
+pca_result <- prcomp(team.gene.subset[,-c(1, ncol(team.gene.subset))], center = TRUE, scale. = TRUE)
+
+# Visualize the importance of principal components
+summary(pca_result)
+plot(pca_result)
+
+# Calculate cumulative variance explained
+cumulative_variance <- cumsum(pca_result$sdev^2) / sum(pca_result$sdev^2)
+
+# Find number of components for 90% variance
+num_components <- which(cumulative_variance >= 0.90)[1]
+
+# Extract loadings (contributions) of the first principal component
+loadings <- pca_result$rotation[,1]
+
+# Get the absolute values of the loadings to consider both positive and negative contributions
+abs_loadings <- abs(loadings)
+
+# Identify the top N genes based on their loadings' absolute values
+top_N_genes_indices <- order(abs_loadings, decreasing = TRUE)[1:num_components]
+top_N_genes_names <- names(abs_loadings)[top_N_genes_indices]
+
+# Add the class variable column name to the list of top genes to keep it
+top_N_genes_with_class <- c(top_N_genes_names, "Class")
+
+# Filter the original dataset to include only the top N genes and the class variable
+team.gene.subset_unsup <- team.gene.subset[, top_N_genes_with_class]
+```
+
+```{r, eval=TRUE}
+# Task 1B - Supervised Dimension Reduction using T Test
+
+# Function to perform t-test and return p-value
+perform_t_test <- function(data, gene_column) {
+  t_result <- t.test(data[[gene_column]] ~ data$Class)
+  return(t_result$p.value)
+}
+
+# Apply t-test for each gene (Excluding ID and Class label)
+gene_columns <- colnames(team.gene.subset)[-c(1, ncol(team.gene.subset))] 
+p_values <- sapply(gene_columns, perform_t_test, data = team.gene.subset)
+
+# Filter genes based on p-value < 0.05
+significant_genes <- names(p_values)[p_values < 0.05]
+
+# Add the class label column to the list of significant genes
+significant_genes_with_label <- c(significant_genes, "Class") 
+
+# Filter the original dataset to keep only the significant genes and the class label
+team.gene.subset_sup <- team.gene.subset[, significant_genes_with_label]
+```
+
+\textbf{Task 2: Use unsupervised learning models/clustering to investigate clusters/groups of genes and clusters/groups of patients. Apply Principal Component Analysis, k-means clustering and hierarchical clustering. You may add one further method.}
+```{r, eval=TRUE}
+# Perform PCA on the dataset excluding Class Variable
+pca_results <- prcomp(team.gene.subset_unsup[, -ncol(team.gene.subset_unsup)], center = TRUE, scale. = TRUE)
+
+# Plot PCA to visualize the first two principal components
+plot(pca_results$x[, 1:2], xlab = "PC1", ylab = "PC2", main = "PCA of Gene Expression Data")
+
+# Elbow method to determine K Value
+# Calculate WCSS for a range of k values
+set.seed(seed_val)  # Set seed to ensure reproducibility
+
+wcss <- numeric(10)  # Array to store value
+
+for (k in 1:10) {  # Evaluating k from 1 to 10
+  set.seed(seed_val)  # Reset the seed for each iteration
+  kmeans_result <- kmeans(pca_results$x[, 1:2], centers = k, nstart = 25)
+  wcss[k] <- kmeans_result$tot.withinss
+}
+
+# Plot the WCSS to visualize the elbow
+plot(1:10, wcss, type = "b", xlab = "Number of Clusters k", ylab = "Within-Cluster Sum of Squares (WCSS)", main = "Elbow Method for Optimal k")
+
+#Based on the WCSS values, we observe a notable change in the slope around 
+#k = 3 or k = 4, indicating that 3 or 4 clusters could be a reasonable choice.
+#The exact elbow point can sometimes be subjective and depends on how sharply the slope changes,
+#so it's often useful to consider other factors (such as domain knowledge or additional validation metrics) alongside the Elbow Method to make a final decision on the optimal number of clusters.
+
+# Silhouette method to determine K Value
+avg_sil_width <- numeric(10)  # Array to store value
+
+for (k in 2:10) {  # Starting from 2 because silhouette score requires at least 2 clusters
+  set.seed(seed_val)  # Set seed to ensure reproducibility
+  km_res <- kmeans(pca_results$x[, 1:2], centers = k, nstart = 25)
+  silhouette_res <- silhouette(km_res$cluster, dist(pca_results$x[, 1:2]))
+  avg_sil_width[k] <- mean(silhouette_res[, "sil_width"])
+}
+
+# Plot the average silhouette width for each k
+plot(2:10, avg_sil_width[2:10], type = "b", xlab = "Number of Clusters k", ylab = "Average Silhouette Width", main = "Silhouette Method for Optimal k")
+
+#The highest average silhouette widths are observed for k = 3 (0.7522921), indicating that dividing your PCA-reduced gene expression data into 3 clusters likely provides the most distinct and well-separated grouping according to this method.
+#The scores decrease after k = 3, suggesting that additional clusters do not improve the distinction between them.
+
+# Determine the optimal number of clusters
+set.seed(seed_val) # Set seed to ensure reproducibility
+k <- 3 #Based on Optimal K from Elbow and Silhouette Method
+kmeans_result <- kmeans(pca_results$x[, 1:2], centers = k)
+
+# Plot the clusters
+plot(pca_results$x[, 1:2], col = kmeans_result$cluster, xlab = "PC1", ylab = "PC2", main = "k-means Clustering on PCA-reduced Data")
+points(kmeans_result$centers, col = 1:k, pch = 8, cex = 2)
+
+# Use Euclidean distance and complete linkage for hierarchical clustering
+dist_mat <- dist(t(team.gene.subset_unsup[, -ncol(team.gene.subset_unsup)])) # Compute distance matrix
+hc_result <- hclust(dist_mat, method = "complete")
+
+# Plot the dendrogram
+plot(hc_result, main = "Hierarchical Clustering of Gene Expression Data", sub = "", xlab = "")
+
+#t-SNE test
+# Select the first N principal components for t-SNE
+pca_N <- pca_results$x[, 1:num_components]
+
+# pca_N is the PCA-reduced dataset ready for t-SNE
+set.seed(seed_val) # Set seed to ensure reproducibility
+adjusted_perplexity <- 5 # Adjusted to a lower value since it is a small datasets
+
+# Perform t-SNE with the adjusted perplexity value
+tsne_results <- Rtsne(pca_N, dims = 2, perplexity = adjusted_perplexity, verbose = TRUE)
+
+# Plot the t-SNE results
+plot(tsne_results$Y[,1], tsne_results$Y[,2], main = "t-SNE on Gene Expression Data", xlab = "", ylab = "", pch = 20, col = rainbow(length(unique(kmeans_result$cluster)))[kmeans_result$cluster])
+legend("topright", legend = unique(kmeans_result$cluster), col = rainbow(length(unique(kmeans_result$cluster))), pch = 20)
+```
+\textbf{Task 3: Use supervised learning models/classification to predict the class (invasive or non invasive) of future patients. Apply Logistic Regression, LDA, QDA, k-NN, Random Forest and SVM. Discuss why you choose specific hyper parameters of a supervised learning model. You may add one or two further methods to the investigation. Use resampling techniques to compare the machine learning models applied. Suggest and justify your ‘best’ machine learning model.}
+```{r, eval=TRUE}
+# Supervised - Logistic Regression, LDA, QDA, k-NN, Random Forest and SVM
+
+set.seed(seed_val)  # Set seed to ensure reproducibility
+
+# Convert class labels to a factor for classification
+Y <- as.factor(team.gene.subset_sup[, ncol(team.gene.subset_sup)])
+X <- team.gene.subset_sup[, -ncol(team.gene.subset_sup)]
+
+# Splitting the data into training and testing sets
+trainIndex <- createDataPartition(Y, p = .8, list = FALSE)
+X_train <- X[trainIndex, ]
+Y_train <- Y[trainIndex]
+X_test <- X[-trainIndex, ]
+Y_test <- Y[-trainIndex]
+
+# Cleaning factor levels of Y_train to ensure they are valid R variable names
+Y_train=ifelse(Y_train==1,0,1)
+Y_test=ifelse(Y_test==1,0,1)
+Y_train <- factor(Y_train)
+Y_test <- factor(Y_test)
+levels(Y_train)
+
+# Set up cross-validation control with class probabilities
+control <- trainControl(method = "cv", 
+                        number = 10, 
+                        summaryFunction = multiClassSummary, 
+                        savePredictions = TRUE)
+
+# Defining the target metric for evaluation
+metric <- "Accuracy"
+
+# Logistic Regression
+# Setting Hyper Parameters for tuning
+lr_hyperparamters= expand.grid(alpha=seq(0,1,0.1), 
+                               lambda=seq(0.001, 0.1, 
+                                          length.out=10))
+
+# Executing Logistic Regression
+model_log <- train(Y_train ~ .,
+                   data = data.frame(X_train, Y_train),
+                   method = "glmnet", family = "binomial",
+                   trControl = control,
+                   tuneGrid=lr_hyperparamters,
+                   verbosity=0)
+
+# Make predictions on the test data
+predictions_log <- predict(model_log, newdata = X_test)
+
+# Create a confusion matrix
+confusion_matrix_log <- table(predictions_log, Y_test)
+confusion_matrix_log
+
+# Calculate accuracy
+acc_log=sum(diag(confusion_matrix_log)) / sum(confusion_matrix_log)
+acc_log
+
+# The best parameters for logistic regression model are as follows:
+# Check the best parameters
+best_params_log <- model_log$bestTune
+print(best_params_log)
+# alpha is 0 means ridge regression is the best hyperparameter
+
+# LDA
+model_lda <- train(Y_train ~ ., 
+                   data = data.frame(X_train, Y_train), 
+                   method = "lda", 
+                   trControl = control, 
+                   metric = metric,
+                   verbose = FALSE)
+
+# GBM
+model_gbm <- train(Y_train ~ ., 
+                   data = data.frame(X_train, Y_train), 
+                   method = "gbm", 
+                   trControl = control, 
+                   metric = metric, tuneLength = 5,
+                   verbose = FALSE
+                   )
+
+# SVM
+# Setting Hyper Parameters for tuning
+svm_hyperparameters <- expand.grid(C = c(0.1, 1, 10)) 
+Y_train=factor(Y_train)
+
+# Executing SVM
+model_svm <- train(Y_train ~ ., 
+                   data=data.frame(X_train, Y_train), 
+                   method = "svmRadial",
+                   trControl = control, 
+                   metric = "Accuracy", 
+                   TuneGrid=svm_hyperparameters,
+                   tuneLength = 3,
+                   verbose = FALSE)
+
+Y_pred_svm = predict(model_svm, X_test)
+cm_svm = table(Y_pred_svm,Y_test)
+svm_acc=sum(diag(cm_svm)) / sum(cm_svm)
+svm_acc
+best_params_svm <- model_svm$bestTune
+best_params_svm
+
+# KNN
+# Setting Hyper Parameters for tuning
+knn_hyperparameters=expand.grid(
+  k=c(1,2,3,4,5,6,7,8)
+)
+
+# Executing KNN
+model_knn <- train(Y_train ~ .,
+                   data = data.frame(X_train, Y_train), 
+                   method = "knn", 
+                   trControl = control,
+                   tuneGrid=knn_hyperparameters
+)
+
+Y_pred_knn=predict(model_knn, as.matrix(X_test))
+cm_knn=table(Y_pred_knn,Y_test)
+knn_acc=sum(diag(cm_knn)) / sum(cm_knn)
+knn_acc
+best_params_knn <- model_knn$bestTune
+best_params_knn
+
+# Random Forest
+model_rf <- train(Y_train ~ ., 
+                  data = data.frame(X_train, Y_train), 
+                  method = "rf", 
+                  trControl = control, 
+                  metric = metric, tuneLength = 3,
+                  verbose = FALSE)
+
+#XGboost
+model_xgb <- xgboost(data = as.matrix(X_train), label = as.numeric(as.character(Y_train)), max.depth = 4, eta = 1, nthread = 2, nrounds = 2, objective = "binary:logistic", verbosity=0)
+Y_pred_xgb=predict(model_xgb, as.matrix(X_test))
+Y_pred_xgb_bin=ifelse(Y_pred_xgb>0.5,1,0)
+cm_xgb=table(Y_pred_xgb_bin,Y_test)
+cm_xgb
+xgb_acc=sum(diag(cm_xgb)) / sum(cm_xgb)
+xgb_acc
+
+# XGboost hyperparameter tuned.
+xgb_hyperparameter <- expand.grid(
+  nrounds = c(50, 100, 200),
+  max_depth = c(2, 4, 6),
+  eta = c(0.01, 0.1, 0.3),
+  
+  gamma = 0,
+  colsample_bytree = 1,
+  min_child_weight = 1,
+  subsample = 1
+)
+Y_train <- as.numeric(as.character(Y_train))
+
+model_xgb_hyp=train(as.matrix(X_train), factor(Y_train), 
+                    method="xgbTree", 
+                    trControl=control, 
+                    tuneGrid=xgb_hyperparameter,
+                    tuneLength = 5,
+                    verbose = FALSE)
+
+Y_pred_xgb_hyp=predict(model_xgb_hyp, as.matrix(X_test))
+levels(Y_pred_xgb_hyp)
+Y_pred_xgb_hyp_bin=ifelse(Y_pred_xgb_hyp>0.5,1,0)
+cm_xgb_hyp=table(Y_pred_xgb_hyp,Y_test)
+cm_xgb
+xgb_acc_hyp=sum(diag(cm_xgb_hyp) )/ sum(cm_xgb_hyp)
+xgb_acc_hyp
+
+#best_xgb_parameters
+best_xgb_params= model_xgb_hyp$bestTune
+best_xgb_params
+
+# Create a list of model objects
+model_list <- list(LogReg = model_log, LDA = model_lda, GBM = model_gbm, KNN = model_knn, RandomForest = model_rf, SVM = model_svm,XGboost=model_xgb_hyp)
+
+# Create tmodel_log# Create the resamples object
+results <- resamples(model_list)
+
+# Analyze the results
+summary(results)
+
+# Convert to factor and ensure both have the same levels
+unique_classes <- sort(unique(c(Y_train, Y_test)))
+
+# Evaluate the GBM model on the test set
+predictions_baseline <- predict(model_gbm, newdata = X_test)
+
+predictions_baseline <- factor(predictions_baseline, levels = unique_classes)
+Y_test <- factor(Y_test, levels = unique_classes)
+
+# Generating confusion matrix
+confusionMatrix_baseline <- confusionMatrix(predictions_baseline, Y_test)
+performance_baseline <- confusionMatrix_baseline$overall['Accuracy']
+```
+
+```{r, eval=TRUE}
+# Assuming pca_results and k are already defined as before
+kmeans_result <- kmeans(pca_results$x[, 1:2], centers = k)
+
+# Add the cluster labels to your original dataset as a new feature
+team.gene.subset_sup$ClusterLabel <- factor(kmeans_result$cluster)
+
+# Assuming you're using the same split as before
+X <- cbind(team.gene.subset_sup[, -ncol(team.gene.subset_sup)], ClusterLabel = team.gene.subset_sup$ClusterLabel)
+Y <- team.gene.subset_sup[, ncol(team.gene.subset_sup)]
+
+# Splitting the data into training and testing sets again to include ClusterLabel
+set.seed(seed_val)  # Ensure reproducibility
+trainIndex <- createDataPartition(Y, p = .8, list = FALSE)
+X_train <- X[trainIndex, ]
+Y_train <- Y[trainIndex]
+X_test <- X[-trainIndex, ]
+Y_test <- Y[-trainIndex]
+
+# control settings remain the same
+model_gbm_with_clusters <- train(Y_train ~ ., data = data.frame(X_train, Y_train), 
+                                 method = "gbm", trControl = control, metric = metric, tuneLength = 5,verbose = FALSE)
+
+# Predict and evaluate
+predictions_with_clusters <- predict(model_gbm_with_clusters, newdata = X_test)
+confusionMatrix_with_clusters <- confusionMatrix(predictions_with_clusters, Y_test)
+
+# Ensure you extract accuracy as numeric values
+accuracy_baseline <- confusionMatrix_baseline$overall["Accuracy"]
+accuracy_with_clusters <- confusionMatrix_with_clusters$overall["Accuracy"]
+
+# Calculate performance improvement for accuracy
+performance_improvement <- accuracy_with_clusters - accuracy_baseline
+
+# Display the performance improvement
+cat("Performance Improvement (Accuracy):", performance_improvement, "\n")
+```
