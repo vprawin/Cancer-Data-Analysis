@@ -65,17 +65,13 @@ K-means randomly selects clusters and then classifies all the data points in the
 
 - **Elbow Method**
 
-![A graph of a number of clusters
-
-Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.003.png)
+![Pic](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.003.png)
 
 The above graph tells us about the optimal number of clusters. Based on the WCSS values, we observe a notable change in the slope around k = 3 or k = 4, indicating that 3 or 4 clusters is a reasonable choice. 
 
 - **Silhouette Score Method**:
 
-![A graph with numbers and lines
-
-Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.004.png)
+![Pic](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.004.png)
 
 The silhouette score falls in –1 to 1. Any value which is closer to 1 is better. According to this, the maximum average silhouette widths are recorded for k = 3 (0.7522921). Breaking our PCA-reduced gene expression data into three clusters is expected to offer the most distinct and well-separated grouping. After k = 3, the scores start to decline, indicating that more clusters do not enhance the ability to distinguish between them. From above 2 methods, we are finalizing the value of **k=3.**
 
@@ -122,9 +118,7 @@ Random Forest is an ensemble technique which allows to capture complex relations
 
 For our dataset, Random forest was leading to over fit, so we have selected cross validation only. The median accuracy is 0.714
 - ### <a name="_toc161238061"></a>***Support Vector Classifier***
-![A screenshot of a computer code
-
-Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.012.png)
+![Pic](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.012.png)
 
 SVM demonstrated competitive performance, particularly in scenarios with high-dimensional data and complex decision boundaries. Its ability to handle non-linear data through kernel tricks made it a valuable model for various classification tasks. The hyperparameter tuning for SVM contains the optimization factor. The accuracy is 0.833
 - ### <a name="_toc161238062"></a>***Gradient Boosting Model***
