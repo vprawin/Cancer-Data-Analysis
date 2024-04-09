@@ -102,9 +102,7 @@ We won’t be using Quadratic Determinant Analysis as it is not suitable for our
 - ### <a name="_toc161238057"></a>***Logistic Regression:***
 The most common classification method. We used the “glmnet” package to train the data using logistic regression.
 
-![A screenshot of a computer code
-
-Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.008.png)
+![Pic](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.008.png)
 
 Lr\_hyperparameters, contains the parameters inside the logistic regression model which are used for tuning.
 
@@ -120,9 +118,7 @@ KNN considers the nearest neighbors and their class for classification of any ne
 - ### <a name="_toc161238060"></a>***Random Forest***
 Random Forest is an ensemble technique which allows to capture complex relationships. 
 
-![A screenshot of a computer program
-
-Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.011.png)
+![Pic](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.011.png)
 
 For our dataset, Random forest was leading to over fit, so we have selected cross validation only. The median accuracy is 0.714
 - ### <a name="_toc161238061"></a>***Support Vector Classifier***
@@ -132,9 +128,7 @@ Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-
 
 SVM demonstrated competitive performance, particularly in scenarios with high-dimensional data and complex decision boundaries. Its ability to handle non-linear data through kernel tricks made it a valuable model for various classification tasks. The hyperparameter tuning for SVM contains the optimization factor. The accuracy is 0.833
 - ### <a name="_toc161238062"></a>***Gradient Boosting Model***
-![A computer code with black text
-
-Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.013.png)
+![Pic](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.013.png)
 
 GBM can handle heterogeneous features and is robust to outliers due to its ensemble nature. It typically provides high predictive accuracy and can capture complex interactions between variables.
 
@@ -146,9 +140,7 @@ Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-
 
 XGboost is one of the most recent boosting methods and is widely used in Machine Learning. One of the best advantages of XGboost is that it stays robust even for the data set with missing values.
 
-![A screenshot of a computer
-
-Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.015.png)
+![Pic](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.015.png)
 
 There are various parameters that can be used for hyperparameter tuning of XGboost, like, the learning rate, maximum depth, etc. The median accuracy of xgboost is  0.69. Following are best parameters after hyperparameter.
 ## <a name="_toc161238064"></a>**Evaluating the results of Resampling:**
