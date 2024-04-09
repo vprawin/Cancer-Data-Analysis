@@ -1,6 +1,3 @@
-﻿|![](Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.001.png)||14|
-| :- | :-: | -: |
-
 # <a name="_toc161238029"></a>**Introduction**
 Biomedical research regarding understanding cancer development and its mechanism has been its crucial point. With the advancement of technology in the medical field researchers now have vast amounts of data which hold valuable information about the molecular basis of cancer. In this report, we will analyze the gene data given to us to identify a pattern to build a predictive model for cancer classification. The Dataset that we have been provided contains information for 78 patients which are the rows in the data set and 4949 genes which are the columns in the dataset and the last column is the target column which tells us about the type of cancer, 1 indicate invasive cancer type and 2 indicates non-invasive cancer type. For this analysis we will be using several machine learning techniques to answer several research questions. 
 # <a name="_toc161238030"></a>**Abstract**
