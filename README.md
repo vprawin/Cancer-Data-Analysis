@@ -112,15 +112,11 @@ Logistic regression gives us a median accuracy of 0.833
 - ### <a name="_toc161238058"></a>***Linear Discriminant Analysis***
 LDA is primarily a dimensionality reduction technique which helps us train complex high dimensional problems. The code for LDA under the “caret” package is below.The median accuracy we get is 0.714.
 
-![A computer code with black text
-
-Description automatically generated with medium confidence](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.009.png)
+![Pic](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.009.png)
 - ### <a name="_toc161238059"></a>***K-Nearest Neighbors***
 KNN considers the nearest neighbors and their class for classification of any new datapoint. The number of neighbors is the main parameter which is used to tune. Accuracy obtained by KNN is 0.75
 
-![A screenshot of a computer code
-
-Description automatically generated](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.010.png)
+![Pic](Image/Aspose.Words.96696cac-afe9-4f16-b5d4-0b03d3031a7b.010.png)
 - ### <a name="_toc161238060"></a>***Random Forest***
 Random Forest is an ensemble technique which allows to capture complex relationships. 
 
